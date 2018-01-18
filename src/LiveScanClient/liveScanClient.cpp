@@ -1,4 +1,4 @@
-//   Copyright (C) 2015  Marek Kowalski (M.Kowalski@ire.pw.edu.pl), Jacek Naruniec (J.Naruniec@ire.pw.edu.pl)
+﻿//   Copyright (C) 2015  Marek Kowalski (M.Kowalski@ire.pw.edu.pl), Jacek Naruniec (J.Naruniec@ire.pw.edu.pl)
 //   License: MIT Software License   See LICENSE.txt for the full license.
 
 //   If you use this software in your research, then please use the following citation:
@@ -60,6 +60,7 @@ LiveScanClient::LiveScanClient() :
 	m_bSocketThread(true),
 	m_bFrameCompression(true),
 	m_iCompressionLevel(2),
+	m_lCaptureTime(0),
 	m_pClientSocket(NULL),
 	m_nFilterNeighbors(10),
 	m_fFilterThreshold(0.01f)
@@ -207,7 +208,7 @@ void LiveScanClient::UpdateFrame()
 
 		if (m_bCaptureFrame)
 		{
-			m_framesFileWriterReader.writeFrame(m_vLastFrameVertices, m_vLastFrameRGB);
+			m_framesFileWriterReader.writeFrame(m_vLastFrameVertices, m_vLastFrameRGB, m_lCaptureTime);
 			m_bConfirmCaptured = true;
 			m_bCaptureFrame = false;
 		}
@@ -449,7 +450,16 @@ void LiveScanClient::HandleSocket()
 	{
 		//capture a frame
 		if (received[i] == MSG_CAPTURE_FRAME)
+		{
 			m_bCaptureFrame = true;
+			i++;
+
+			m_lCaptureTime = *(long long*)&received[i];
+			//char str[100];
+			//sprintf(str, "time %lld", m_lCaptureTime);
+			//OutputDebugString((LPCWSTR)str);
+			i += sizeof(long long);
+		}
 		//calibrate
 		else if (received[i] == MSG_CALIBRATE)
 			m_bCalibrate = true;
@@ -526,13 +536,14 @@ void LiveScanClient::HandleSocket()
 
 			vector<Point3s> points;
 			vector<RGB> colors; 
-			bool res = m_framesFileWriterReader.readFrame(points, colors);
+			long long capturedTime;
+			bool res = m_framesFileWriterReader.readFrame(points, colors, &capturedTime);
 			if (res == false)
 			{
 				int size = -1;
 				m_pClientSocket->SendBytes((char*)&size, 4);
 			} else
-				SendFrame(points, colors, m_vLastFrameBody);
+				SendFrame(points, colors, m_vLastFrameBody, capturedTime);
 		}
 		//send last frame
 		else if (received[i] == MSG_REQUEST_LAST_FRAME)
@@ -540,7 +551,14 @@ void LiveScanClient::HandleSocket()
 			byteToSend = MSG_LAST_FRAME;
 			m_pClientSocket->SendBytes(&byteToSend, 1);
 
-			SendFrame(m_vLastFrameVertices, m_vLastFrameRGB, m_vLastFrameBody);
+			i++;
+			m_lCaptureTime = *(long long*)&received[i];
+			//char str[100];
+			//sprintf(str, "time %lld", m_lCaptureTime);
+			//OutputDebugString((LPCWSTR)str);
+			i += sizeof(long long);
+
+			SendFrame(m_vLastFrameVertices, m_vLastFrameRGB, m_vLastFrameBody, m_lCaptureTime);
 		}
 		//receive calibration data
 		else if (received[i] == MSG_RECEIVE_CALIBRATION)
@@ -599,7 +617,7 @@ void LiveScanClient::HandleSocket()
 	}
 }
 
-void LiveScanClient::SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector<Body> body)
+void LiveScanClient::SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector<Body> body, long long capturedTime)
 {
 	int size = RGB.size() * (3 + 3 * sizeof(short)) + sizeof(int);
 
@@ -632,6 +650,7 @@ void LiveScanClient::SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector
 		size += nJoints * (3 * sizeof(float) + 2 * sizeof(int));
 		size += nJoints * 2 * sizeof(float);
 	}
+	size += sizeof(long long);
 	buffer.resize(size);
 	
 	memcpy(buffer.data() + pos, &nBodies, sizeof(nBodies));
@@ -668,6 +687,9 @@ void LiveScanClient::SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector
 			pos += sizeof(float);
 		}
 	}
+
+	memcpy(buffer.data() + pos, &capturedTime, sizeof(long long));
+	pos += sizeof(long long);
 
 	int iCompression = static_cast<int>(m_bFrameCompression);
 

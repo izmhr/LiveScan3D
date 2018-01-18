@@ -210,5 +210,19 @@ namespace KinectServer
             binaryWriter.Flush();
             fileStream.Close();
         }
+
+        public static void saveTime(string filename, DateTime dt)
+        {
+            FileStream fileStream = File.Open(filename, FileMode.Create);
+
+            System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(fileStream);
+            System.IO.BinaryWriter binaryWriter = new System.IO.BinaryWriter(fileStream);
+
+            streamWriter.Write(dt.ToString());
+            streamWriter.Write(":");
+            streamWriter.WriteLine(dt.ToString("fff"));
+            streamWriter.Flush();
+            fileStream.Close();
+        }
     }
 }

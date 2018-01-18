@@ -42,7 +42,8 @@ namespace KinectServer
 
         public List<byte> lFrameRGB = new List<byte>();
         public List<Single> lFrameVerts = new List<Single>();
-        public List<Body> lBodies = new List<Body>(); 
+        public List<Body> lBodies = new List<Body>();
+        public DateTime capturedDateTime = new DateTime();
 
         public event SocketChangedHandler eChanged;
 
@@ -57,6 +58,8 @@ namespace KinectServer
             bFrameCaptured = false;
             byteToSend[0] = 0;
             SendByte();
+
+            SendTime();
         }
 
         public void Calibrate()
@@ -95,6 +98,15 @@ namespace KinectServer
             byteToSend[0] = 4;
             SendByte();
             bLatestFrameReceived = false;
+
+            SendTime();
+        }
+
+        public void SendTime()
+        {
+            long now = DateTime.Now.ToBinary();
+            System.Diagnostics.Debug.WriteLine("now" + now.ToString());
+            oSocket.Send(BitConverter.GetBytes(now));
         }
 
         public void SendCalibrationData()
@@ -255,6 +267,11 @@ namespace KinectServer
 
                 lBodies.Add(tempBody);
             }
+            if (buffer.Length == startIdx) return;
+
+            long capturedTime = BitConverter.ToInt64(buffer, startIdx);
+            System.Diagnostics.Debug.WriteLine("capturedTime" + capturedTime.ToString());
+            capturedDateTime = DateTime.FromBinary(capturedTime);
         }
 
         public byte[] Receive(int nBytes)

@@ -197,8 +197,9 @@ namespace KinectServer
             {
                 List<List<byte>> lFrameRGBAllDevices = new List<List<byte>>();
                 List<List<float>> lFrameVertsAllDevices = new List<List<float>>();
+                DateTime dt = new DateTime();
 
-                bool success = oServer.GetStoredFrame(lFrameRGBAllDevices, lFrameVertsAllDevices);
+                bool success = oServer.GetStoredFrame(lFrameRGBAllDevices, lFrameVertsAllDevices, ref dt);
 
                 //This indicates that there are no more stored frames.
                 if (!success)
@@ -224,7 +225,9 @@ namespace KinectServer
                     if (!oSettings.bMergeScansForSave)
                     {
                         string outputFilename = outDir + "\\" + nFrames.ToString().PadLeft(5, '0') + i.ToString() + ".ply";
-                        Utils.saveToPly(outputFilename, lFrameVertsAllDevices[i], lFrameRGBAllDevices[i], oSettings.bSaveAsBinaryPLY);                        
+                        Utils.saveToPly(outputFilename, lFrameVertsAllDevices[i], lFrameRGBAllDevices[i], oSettings.bSaveAsBinaryPLY);
+                        outputFilename = outDir + "\\" + nFrames.ToString().PadLeft(5, '0') + ".txt";
+                        Utils.saveTime(outputFilename, dt);
                     }
                 }
 
@@ -233,6 +236,8 @@ namespace KinectServer
                 {
                     string outputFilename = outDir + "\\" + nFrames.ToString().PadLeft(5, '0') + ".ply";
                     Utils.saveToPly(outputFilename, lFrameVerts, lFrameRGB, oSettings.bSaveAsBinaryPLY);
+                    outputFilename = outDir + "\\" + nFrames.ToString().PadLeft(5, '0') + ".txt";
+                    Utils.saveTime(outputFilename, dt);
                 }
             }
         }

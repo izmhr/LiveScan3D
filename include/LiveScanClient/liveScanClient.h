@@ -56,6 +56,8 @@ private:
 	bool m_bFrameCompression;
 	int m_iCompressionLevel;
 
+	long long m_lCaptureTime;
+
 	FrameFileWriterReader m_framesFileWriterReader;
 
 
@@ -88,7 +90,7 @@ private:
     bool SetStatusMessage(_In_z_ WCHAR* szMessage, DWORD nShowTimeMsec, bool bForce);
 
 	void HandleSocket();
-	void SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector<Body> body);
+	void SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector<Body> body, long long capturedTime);
 
 	void SocketThreadFunction();
 	void StoreFrame(Point3f *vertices, Point2f *mapping, RGB *color, vector<Body> &bodies, BYTE* bodyIndex);
