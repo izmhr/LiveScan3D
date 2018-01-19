@@ -44,7 +44,7 @@ namespace LiveScanPlayer
             string[] lineParts = ReadLine().Split(' ');
             int nPoints = Int32.Parse(lineParts[1]);
             lineParts = ReadLine().Split(' ');
-            int frameTimestamp = Int32.Parse(lineParts[1]);
+            long frameTimestamp = Int64.Parse(lineParts[1]);
 
             Console.WriteLine((frameTimestamp / 1000).ToString());
 
