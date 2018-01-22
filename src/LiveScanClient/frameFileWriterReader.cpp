@@ -4,13 +4,7 @@
 
 FrameFileWriterReader::FrameFileWriterReader()
 {
-	size_t BoolSize = sizeof(bool);
-	size_t JointSize = sizeof(Joint);
-	size_t JointTypeSize = sizeof(JointType);
-	size_t CameraSpacePointSize = sizeof(CameraSpacePoint);
-	size_t TrackingStateSize = sizeof(TrackingState);
-	size_t Point2fSize = sizeof(Point2f);
-	size_t BodySize = sizeof(Body);
+	size_t SaveJointsSize = sizeof(SaveJoints);
 }
 
 void FrameFileWriterReader::closeFileIfOpened()

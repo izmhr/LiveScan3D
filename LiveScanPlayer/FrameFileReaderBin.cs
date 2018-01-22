@@ -12,6 +12,7 @@ namespace LiveScanPlayer
         BinaryReader binaryReader;
         int currentFrameIdx = 0;
         string filename;
+        const int BYTES_PER_BODY = 704; //frameFileWriterReader.h で定義した struct SaveJoints のサイズ(bytes)
 
         public FrameFileReaderBin(string filename)
         {
@@ -54,10 +55,11 @@ namespace LiveScanPlayer
             int bytesPerVertexPoint = 3 * sizeof(short);
             int bytesPerColorPoint = 4 * sizeof(byte);
             int bytesPerPoint = bytesPerVertexPoint + bytesPerColorPoint;
-            
-            byte[] frameData = binaryReader.ReadBytes(bytesPerPoint * nPoints);
 
-            if (frameData.Length < bytesPerPoint * nPoints)
+            // bin データから、frame毎に、点群情報に加えてボディ情報も読み取る
+            byte[] frameData = binaryReader.ReadBytes(bytesPerPoint * nPoints + BYTES_PER_BODY * 6);
+            int frameDataOrg = frameData.Length;
+            if (frameData.Length < frameDataOrg)
             {
                 Rewind();
                 ReadFrame(vertices, colors);
@@ -68,6 +70,8 @@ namespace LiveScanPlayer
             int colorDataSize = nPoints * bytesPerColorPoint;
             Buffer.BlockCopy(frameData, 0, tempVertices, 0, vertexDataSize);
             Buffer.BlockCopy(frameData, vertexDataSize, tempColors, 0, colorDataSize);
+            
+            // TODO body の情報を使いたかったらここで何かする。現状は何もしていない（つまり捨ててる）
 
             for (int i = 0; i < nPoints; i++)
             {
