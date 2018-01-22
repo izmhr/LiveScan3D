@@ -4,7 +4,13 @@
 
 FrameFileWriterReader::FrameFileWriterReader()
 {
-
+	size_t BoolSize = sizeof(bool);
+	size_t JointSize = sizeof(Joint);
+	size_t JointTypeSize = sizeof(JointType);
+	size_t CameraSpacePointSize = sizeof(CameraSpacePoint);
+	size_t TrackingStateSize = sizeof(TrackingState);
+	size_t Point2fSize = sizeof(Point2f);
+	size_t BodySize = sizeof(Body);
 }
 
 void FrameFileWriterReader::closeFileIfOpened()
@@ -56,14 +62,13 @@ void FrameFileWriterReader::openNewFileForWriting()
 	resetTimer();
 }
 
-bool FrameFileWriterReader::readFrame(std::vector<Point3s> &outPoints, std::vector<RGB> &outColors, std::vector<Body> &outBodies, long long* capturedTime)
+bool FrameFileWriterReader::readFrame(std::vector<Point3s> &outPoints, std::vector<RGB> &outColors, SaveJoints *saveJoints, long long* capturedTime)
 {
 	if (!m_bFileOpenedForReading)
 		openCurrentFileForReading();
 
 	outPoints.clear();
 	outColors.clear();
-	outBodies.clear();
 	FILE *f = m_pFileHandle;
 	int nPoints, timestamp; 
 	char tmp[1024]; 
@@ -78,11 +83,13 @@ bool FrameFileWriterReader::readFrame(std::vector<Point3s> &outPoints, std::vect
 	fgetc(f);		//  '\n'
 	outPoints.resize(nPoints);
 	outColors.resize(nPoints);
-	outBodies.resize(6);
+
+	//SaveJoints saveJoints[6];
 
 	fread((void*)outPoints.data(), sizeof(outPoints[0]), nPoints, f);
 	fread((void*)outColors.data(), sizeof(outColors[0]), nPoints, f);
-	fread((void*)outBodies.data(), sizeof(outBodies[0]), 6, f);
+	//fread((void*)outBodies.data(), sizeof(outBodies[0]), 6, f);
+	fread(saveJoints, sizeof(SaveJoints), 6, f);
 	fgetc(f);		// '\n'
 	return true;
 
@@ -98,11 +105,22 @@ void FrameFileWriterReader::writeFrame(std::vector<Point3s> points, std::vector<
 
 	int nPoints = static_cast<int>(points.size());
 	fprintf(f, "n_points= %d\nframe_timestamp= %lld\n", nPoints, captureTime);
+	
+	SaveJoints saveJoints[6];
+	for (int i = 0; i < 6; i++) {
+		saveJoints[i].bTracked = bodies[i].bTracked;
+		saveJoints[i].SpineBase = bodies[i].vJoints[JointType::JointType_SpineBase];
+		saveJoints[i].SpineMid = bodies[i].vJoints[JointType::JointType_SpineMid];
+		saveJoints[i].SpineShoulder = bodies[i].vJoints[JointType::JointType_SpineShoulder];
+		saveJoints[i].HipLeft = bodies[i].vJoints[JointType::JointType_HipLeft];
+		saveJoints[i].HipRight = bodies[i].vJoints[JointType::JointType_HipRight];
+	}
 	if (nPoints > 0)
 	{
 		fwrite((void*)points.data(), sizeof(points[0]), nPoints, f);
 		fwrite((void*)colors.data(), sizeof(colors[0]), nPoints, f);
-		fwrite((void*)bodies.data(), sizeof(bodies[0]), 6, f);
+		//fwrite((void*)bodies.data(), sizeof(bodies[0]), 6, f);
+		fwrite(saveJoints, sizeof(SaveJoints), 6, f);
 	}
 	fprintf(f, "\n");
 }
