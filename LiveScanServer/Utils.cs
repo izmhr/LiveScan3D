@@ -224,5 +224,36 @@ namespace KinectServer
             streamWriter.Flush();
             fileStream.Close();
         }
+
+        public static void saveTimeAndBodies(string filename, DateTime dt, List<List<Body>> lFramesBodiesAllDevices)
+        {
+            FileStream fileStream = File.Open(filename, FileMode.Create);
+
+            System.IO.StreamWriter streamWriter = new System.IO.StreamWriter(fileStream);
+            System.IO.BinaryWriter binaryWriter = new System.IO.BinaryWriter(fileStream);
+
+            // TIME
+            streamWriter.Write(dt.ToString());
+            streamWriter.Write(":");
+            streamWriter.WriteLine(dt.ToString("fff"));
+
+            // BODIES
+            foreach(List<Body> lBodies in lFramesBodiesAllDevices)
+            {
+                foreach(Body body in lBodies)
+                {
+                    streamWriter.Write(body.bTracked.ToString());
+                    foreach(Joint joint in body.lJoints)
+                    {
+                        streamWriter.Write(",");
+                        streamWriter.Write(joint.jointType.ToString() + "," + joint.position.X + "," + joint.position.Y + "," + joint.position.Z + "," + joint.trackingState.ToString());
+                    }
+                    streamWriter.WriteLine();
+                }
+            }
+
+            streamWriter.Flush();
+            fileStream.Close();
+        }
     }
 }

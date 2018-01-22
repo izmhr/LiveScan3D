@@ -197,9 +197,10 @@ namespace KinectServer
             {
                 List<List<byte>> lFrameRGBAllDevices = new List<List<byte>>();
                 List<List<float>> lFrameVertsAllDevices = new List<List<float>>();
+                List<List<Body>> lFramesBodiesAllDevices = new List<List<Body>>();
                 DateTime dt = new DateTime();
 
-                bool success = oServer.GetStoredFrame(lFrameRGBAllDevices, lFrameVertsAllDevices, ref dt);
+                bool success = oServer.GetStoredFrame(lFrameRGBAllDevices, lFrameVertsAllDevices, lFramesBodiesAllDevices, ref dt);
 
                 //This indicates that there are no more stored frames.
                 if (!success)
@@ -237,7 +238,7 @@ namespace KinectServer
                     string outputFilename = outDir + "\\" + nFrames.ToString().PadLeft(5, '0') + ".ply";
                     Utils.saveToPly(outputFilename, lFrameVerts, lFrameRGB, oSettings.bSaveAsBinaryPLY);
                     outputFilename = outDir + "\\" + nFrames.ToString().PadLeft(5, '0') + ".txt";
-                    Utils.saveTime(outputFilename, dt);
+                    Utils.saveTimeAndBodies(outputFilename, dt, lFramesBodiesAllDevices);
                 }
             }
         }

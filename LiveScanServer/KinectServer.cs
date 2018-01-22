@@ -232,12 +232,13 @@ namespace KinectServer
             }
         }
 
-        public bool GetStoredFrame(List<List<byte>> lFramesRGB, List<List<Single>> lFramesVerts, ref DateTime dt)
+        public bool GetStoredFrame(List<List<byte>> lFramesRGB, List<List<Single>> lFramesVerts, List<List<Body>> lFramesBodies,ref DateTime dt)
         {
             bool bNoMoreStoredFrames;
             lFramesRGB.Clear();
             lFramesVerts.Clear();
-            
+            lFramesBodies.Clear();
+
             lock (oFrameRequestLock)
             {
                 //Request frames
@@ -276,7 +277,8 @@ namespace KinectServer
                     {
                         lFramesRGB.Add(new List<byte>(lClientSockets[i].lFrameRGB));
                         lFramesVerts.Add(new List<Single>(lClientSockets[i].lFrameVerts));
-                        if(i == 0)
+                        lFramesBodies.Add(new List<Body>(lClientSockets[i].lBodies));
+                        if (i == 0)
                         {
                             dt = lClientSockets[i].capturedDateTime;
                         }
