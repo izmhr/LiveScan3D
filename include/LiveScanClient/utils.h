@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
+#include "Kinect.h"
 
 enum INCOMING_MESSAGE_TYPE
 {
@@ -106,6 +107,13 @@ typedef struct RGB
 	BYTE    rgbRed;
 	BYTE    rgbReserved;
 } RGB;
+
+typedef struct Body2
+{
+	bool bTracked;
+	Joint vJoints[25];
+	Point2f vJointsInColorSpace[25];
+} Body2;
 
 Point3f RotatePoint(Point3f &point, std::vector<std::vector<float>> &R);
 Point3f InverseRotatePoint(Point3f &point, std::vector<std::vector<float>> &R);

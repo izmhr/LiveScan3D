@@ -5,6 +5,7 @@
 #include <vector>
 #include <chrono>
 #include "utils.h"
+#include "KinectCapture.h"
 
 class FrameFileWriterReader
 {
@@ -16,8 +17,8 @@ public:
 	// leave filename blank if you want the filename to be generated from the date
 	void setCurrentFilename(std::string filename = ""); 
 
-	void writeFrame(std::vector<Point3s> points, std::vector<RGB> colors, long long captureTime);
-	bool readFrame(std::vector<Point3s> &outPoints, std::vector<RGB> &outColors, long long* capturedTime);
+	void writeFrame(std::vector<Point3s> points, std::vector<RGB> colors, std::vector<Body> bodies, long long captureTime);
+	bool readFrame(std::vector<Point3s> &outPoints, std::vector<RGB> &outColors, std::vector<Body> &outBodies, long long* capturedTime);
 
 	bool openedForWriting() { return m_bFileOpenedForWriting; }
 	bool openedForReading() { return m_bFileOpenedForReading; }

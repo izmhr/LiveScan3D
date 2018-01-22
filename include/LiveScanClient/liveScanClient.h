@@ -90,7 +90,7 @@ private:
     bool SetStatusMessage(_In_z_ WCHAR* szMessage, DWORD nShowTimeMsec, bool bForce);
 
 	void HandleSocket();
-	void SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector<Body> body, long long capturedTime);
+	void SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector<Body>& body, long long capturedTime);
 
 	void SocketThreadFunction();
 	void StoreFrame(Point3f *vertices, Point2f *mapping, RGB *color, vector<Body> &bodies, BYTE* bodyIndex);

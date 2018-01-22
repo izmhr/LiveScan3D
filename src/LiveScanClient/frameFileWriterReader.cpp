@@ -56,13 +56,14 @@ void FrameFileWriterReader::openNewFileForWriting()
 	resetTimer();
 }
 
-bool FrameFileWriterReader::readFrame(std::vector<Point3s> &outPoints, std::vector<RGB> &outColors, long long* capturedTime)
+bool FrameFileWriterReader::readFrame(std::vector<Point3s> &outPoints, std::vector<RGB> &outColors, std::vector<Body> &outBodies, long long* capturedTime)
 {
 	if (!m_bFileOpenedForReading)
 		openCurrentFileForReading();
 
 	outPoints.clear();
 	outColors.clear();
+	outBodies.clear();
 	FILE *f = m_pFileHandle;
 	int nPoints, timestamp; 
 	char tmp[1024]; 
@@ -77,16 +78,18 @@ bool FrameFileWriterReader::readFrame(std::vector<Point3s> &outPoints, std::vect
 	fgetc(f);		//  '\n'
 	outPoints.resize(nPoints);
 	outColors.resize(nPoints);
+	outBodies.resize(6);
 
 	fread((void*)outPoints.data(), sizeof(outPoints[0]), nPoints, f);
 	fread((void*)outColors.data(), sizeof(outColors[0]), nPoints, f);
+	fread((void*)outBodies.data(), sizeof(outBodies[0]), 6, f);
 	fgetc(f);		// '\n'
 	return true;
 
 }
 
 
-void FrameFileWriterReader::writeFrame(std::vector<Point3s> points, std::vector<RGB> colors, long long captureTime)
+void FrameFileWriterReader::writeFrame(std::vector<Point3s> points, std::vector<RGB> colors, std::vector<Body> bodies, long long captureTime)
 {
 	if (!m_bFileOpenedForWriting)
 		openNewFileForWriting();
@@ -99,6 +102,7 @@ void FrameFileWriterReader::writeFrame(std::vector<Point3s> points, std::vector<
 	{
 		fwrite((void*)points.data(), sizeof(points[0]), nPoints, f);
 		fwrite((void*)colors.data(), sizeof(colors[0]), nPoints, f);
+		fwrite((void*)bodies.data(), sizeof(bodies[0]), 6, f);
 	}
 	fprintf(f, "\n");
 }

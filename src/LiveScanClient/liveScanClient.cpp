@@ -208,7 +208,7 @@ void LiveScanClient::UpdateFrame()
 
 		if (m_bCaptureFrame)
 		{
-			m_framesFileWriterReader.writeFrame(m_vLastFrameVertices, m_vLastFrameRGB, m_lCaptureTime);
+			m_framesFileWriterReader.writeFrame(m_vLastFrameVertices, m_vLastFrameRGB, m_vLastFrameBody, m_lCaptureTime);
 			m_bConfirmCaptured = true;
 			m_bCaptureFrame = false;
 		}
@@ -536,14 +536,15 @@ void LiveScanClient::HandleSocket()
 
 			vector<Point3s> points;
 			vector<RGB> colors; 
+			vector<Body> bodies;
 			long long capturedTime;
-			bool res = m_framesFileWriterReader.readFrame(points, colors, &capturedTime);
+			bool res = m_framesFileWriterReader.readFrame(points, colors, bodies, &capturedTime);
 			if (res == false)
-			{
+ 			{
 				int size = -1;
 				m_pClientSocket->SendBytes((char*)&size, 4);
 			} else
-				SendFrame(points, colors, m_vLastFrameBody, capturedTime);
+				SendFrame(points, colors, bodies, capturedTime);
 		}
 		//send last frame
 		else if (received[i] == MSG_REQUEST_LAST_FRAME)
@@ -617,7 +618,7 @@ void LiveScanClient::HandleSocket()
 	}
 }
 
-void LiveScanClient::SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector<Body> body, long long capturedTime)
+void LiveScanClient::SendFrame(vector<Point3s> vertices, vector<RGB> RGB, vector<Body>& body, long long capturedTime)
 {
 	int size = RGB.size() * (3 + 3 * sizeof(short)) + sizeof(int);
 
@@ -717,6 +718,10 @@ void LiveScanClient::StoreFrame(Point3f *vertices, Point2f *mapping, RGB *color,
 	std::vector<RGB> goodColorPoints;
 
 	unsigned int nVertices = pCapture->nDepthFrameWidth * pCapture->nDepthFrameHeight;
+
+	if (nVertices == 0) {
+		OutputDebugString(L"hoge");
+	}
 
 	for (unsigned int vertexIndex = 0; vertexIndex < nVertices; vertexIndex++)
 	{
