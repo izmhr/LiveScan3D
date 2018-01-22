@@ -536,15 +536,15 @@ void LiveScanClient::HandleSocket()
 
 			vector<Point3s> points;
 			vector<RGB> colors; 
-			SaveJoints saveJoints[6];
+			vector<Body> bodies;
 			long long capturedTime;
-			bool res = m_framesFileWriterReader.readFrame(points, colors, saveJoints, &capturedTime);
+			bool res = m_framesFileWriterReader.readFrame(points, colors, bodies, &capturedTime);
 			if (res == false)
  			{
 				int size = -1;
 				m_pClientSocket->SendBytes((char*)&size, 4);
 			} else
-				SendFrame(points, colors, m_vLastFrameBody, capturedTime);
+				SendFrame(points, colors, bodies, capturedTime);
 		}
 		//send last frame
 		else if (received[i] == MSG_REQUEST_LAST_FRAME)
