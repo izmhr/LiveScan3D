@@ -56,10 +56,9 @@ namespace KinectServer
         public void CaptureFrame()
         {
             bFrameCaptured = false;
-            byteToSend[0] = 0;
-            SendByte();
-
-            SendTime();
+            //byteToSend[0] = 0;
+            SendByteAndTime(0);
+            //SendByte();
         }
 
         public void Calibrate()
@@ -95,18 +94,23 @@ namespace KinectServer
 
         public void RequestLastFrame()
         {
-            byteToSend[0] = 4;
-            SendByte();
+            //byteToSend[0] = 4;
+            //SendByte();
+            SendByteAndTime(4);
             bLatestFrameReceived = false;
-
-            SendTime();
         }
 
-        public void SendTime()
+        public void SendByteAndTime(byte message)
         {
+            List<byte> lData = new List<byte>();
             long now = DateTime.Now.ToBinary();
             System.Diagnostics.Debug.WriteLine("now" + now.ToString());
-            oSocket.Send(BitConverter.GetBytes(now));
+            lData.InsertRange(0, BitConverter.GetBytes(now));
+            lData.Insert(0, message);
+
+            if (SocketConnected())
+                oSocket.Send(lData.ToArray());
+            //oSocket.Send(BitConverter.GetBytes(now));
         }
 
         public void SendCalibrationData()
