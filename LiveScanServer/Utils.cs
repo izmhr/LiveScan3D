@@ -175,7 +175,7 @@ namespace KinectServer
             if (binary)
                 streamWriter.WriteLine("ply\nformat binary_little_endian 1.0");
             else
-                streamWriter.WriteLine("ply\nformat ascii 1.0\n");
+                streamWriter.WriteLine("ply\nformat ascii 1.0");
             streamWriter.Write("element vertex " + nVertices.ToString() + "\n");
             streamWriter.Write("property float x\nproperty float y\nproperty float z\nproperty uchar red\nproperty uchar green\nproperty uchar blue\nend_header\n");
             streamWriter.Flush();
@@ -202,7 +202,11 @@ namespace KinectServer
                     for (int k = 0; k < 3; k++)
                         s += vertices[j * 3 + k].ToString(CultureInfo.InvariantCulture) + " ";
                     for (int k = 0; k < 3; k++)
-                        s += colors[j * 3 + k].ToString(CultureInfo.InvariantCulture) + " ";
+                    {
+                        s += colors[j * 3 + k].ToString(CultureInfo.InvariantCulture);
+                        if (k != 2)
+                            s += " ";
+                    }
                     streamWriter.WriteLine(s);
                 }
             }
