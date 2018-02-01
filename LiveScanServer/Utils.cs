@@ -173,9 +173,9 @@ namespace KinectServer
 
             //PLY file header is written here.
             if (binary)
-                streamWriter.WriteLine("ply\nformat binary_little_endian 1.0");
+                streamWriter.Write("ply\nformat binary_little_endian 1.0\n");
             else
-                streamWriter.WriteLine("ply\nformat ascii 1.0");
+                streamWriter.Write("ply\nformat ascii 1.0\n");
             streamWriter.Write("element vertex " + nVertices.ToString() + "\n");
             streamWriter.Write("property float x\nproperty float y\nproperty float z\nproperty uchar red\nproperty uchar green\nproperty uchar blue\nend_header\n");
             streamWriter.Flush();
